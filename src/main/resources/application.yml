@@ -1,0 +1,5 @@
+server:
+  port: 8085
+crypto-compare:
+  api-key: 07d985595cfc672b0179e2ce6ad4e639ab1986d18ef455a2865858e0d2e49d02
+  base-url: https://min-api.cryptocompare.com/
