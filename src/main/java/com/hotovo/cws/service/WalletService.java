@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.UUID;
 import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +32,7 @@ public class WalletService {
 	 * @param id - identificator of the wallet to be returned
 	 * @return wallet information
 	 */
+	@CachePut(value = "wallets", key = "#p0")
 	public Wallet getWalletInformation(Long id) {
 		return wallets.stream()
 				.filter(wallet -> wallet.getId().equals(id))
@@ -43,6 +46,7 @@ public class WalletService {
 	 * @param createWallet - parameters for the wallet to be created
 	 * @return created wallet
 	 */
+	@CachePut(value = "wallets", key = "#result.id")
 	public Wallet createWallet(WalletRequest createWallet) {
 		Optional<Wallet> existingWallet = wallets.stream().filter(w -> isDuplicate(w, createWallet)).findFirst();
 
@@ -70,6 +74,7 @@ public class WalletService {
 	 * @return updated wallet
 	 * @throws RuntimeException in case the wallet is found in the wallets collection
 	 */
+	@CachePut(value = "wallets", key = "#p0")
 	public Wallet updateWallet(Long id, WalletRequest walletUpdate) {
 		return wallets.stream()
 				.filter(w -> w.getId().equals(id))
@@ -91,6 +96,7 @@ public class WalletService {
 	 * @return removed wallet
 	 * @throws RuntimeException in case the wallet is found in the wallets collection
 	 */
+	@CacheEvict(value = "wallets", key = "#p0")
 	public Wallet deleteWallet(Long id) {
 		return wallets.stream()
 				.filter(w -> w.getId().equals(id))
@@ -120,14 +126,14 @@ public class WalletService {
 	}
 
 	//test data initialization
-//	@PostConstruct
+	@PostConstruct
 	private void initWallets() {
-		Set<Currency> currencies = new LinkedHashSet<>();
-		currencies.add(new Currency(100.0, "BTC"));
-		currencies.add(new Currency(5000.0, "ETH"));
-		currencies.add(new Currency(28.0, "LTC"));
-
 		while (wallets.size() < 20) {
+			Set<Currency> currencies = new LinkedHashSet<>();
+			currencies.add(new Currency(100.0, "BTC"));
+			currencies.add(new Currency(5000.0, "ETH"));
+			currencies.add(new Currency(28.0, "LTC"));
+
 			long id = Wallet.getWalletId().getAndIncrement();
 			wallets.add(Wallet.builder()
 					.id(id)

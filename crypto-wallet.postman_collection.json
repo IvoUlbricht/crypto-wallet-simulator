@@ -1,0 +1,216 @@
+{
+	"id": "a83eb377-b6cf-d5d0-c765-2c64578ace05",
+	"name": "crypto-wallet",
+	"description": "",
+	"order": [
+		"661f667b-7715-b5d7-df06-3f0b8af7f799",
+		"86b63887-9c8e-bd1f-55ad-764fc5f8e4b8",
+		"06ea937b-9442-de76-9a77-c3802d942fe7",
+		"cc3ed47b-8a70-30d2-7c1d-0c1d847d68e0",
+		"bcec0005-6c40-d61e-54a9-6028ded835f3",
+		"e891959f-71c7-6406-1b89-ba06075c0d78",
+		"8c7daa8c-4f29-dd4f-e44f-abf701de7dfd"
+	],
+	"folders": [],
+	"folders_order": [],
+	"timestamp": 1605553720955,
+	"owner": "2150328",
+	"public": false,
+	"requests": [
+		{
+			"id": "06ea937b-9442-de76-9a77-c3802d942fe7",
+			"headers": "Content-Type: application/json\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{baseUrl}}/api/wallet/1/currency-buy",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"version": 2,
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1605810056105,
+			"name": "currency buy",
+			"description": "",
+			"collectionId": "a83eb377-b6cf-d5d0-c765-2c64578ace05",
+			"responses": [],
+			"rawModeData": "{\r\n  \"amount\": 400,\r\n  \"currency\": \"BTC\",\r\n  \"destCurrency\": \"ETH\",\r\n  \"id\": 1\r\n}"
+		},
+		{
+			"id": "661f667b-7715-b5d7-df06-3f0b8af7f799",
+			"headers": "Content-Type: application/json\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{baseUrl}}/api/wallet",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1605810065905,
+			"name": "wallet create",
+			"description": "",
+			"collectionId": "a83eb377-b6cf-d5d0-c765-2c64578ace05",
+			"responses": [],
+			"rawModeData": "{\r\n  \"name\": \"manually generated\",\r\n  \"privateKey\": \"test key\",\r\n  \"publicKey\": \"test key\",\r\n  \"currencies\": [\r\n    {\r\n      \"amount\": 100,\r\n      \"symbol\": \"BTC\"\r\n    },\r\n\t{\r\n\t\t\"amount\": 180,\r\n\t\t\"symbol\":\"ETH\"\r\n\t\t\r\n\t}\r\n  ]\r\n}"
+		},
+		{
+			"id": "86b63887-9c8e-bd1f-55ad-764fc5f8e4b8",
+			"headers": "Content-Type: application/json\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "http://localhost:8085/api/wallet/2",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "PUT",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1605800815118,
+			"name": "wallet update",
+			"description": "",
+			"collectionId": "a83eb377-b6cf-d5d0-c765-2c64578ace05",
+			"responses": [],
+			"rawModeData": "{\r\n  \"name\": \"updated wallet 2\",\r\n  \"privateKey\": \"update key\",\r\n  \"publicKey\": \"update key\"\r\n \r\n}"
+		},
+		{
+			"id": "8c7daa8c-4f29-dd4f-e44f-abf701de7dfd",
+			"headers": "Content-Type: application/json\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{baseUrl}}/api/wallet/currency-transfer",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1605810099451,
+			"name": "currency transfer",
+			"description": "",
+			"collectionId": "a83eb377-b6cf-d5d0-c765-2c64578ace05",
+			"responses": [],
+			"rawModeData": "{\r\n  \"destCurrency\": \"BTC\",\r\n  \"destId\": 20,\r\n  \"srcAmount\": 1000,\r\n  \"srcCurrency\": \"ETH\",\r\n  \"srcId\": 1\r\n}"
+		},
+		{
+			"id": "bcec0005-6c40-d61e-54a9-6028ded835f3",
+			"headers": "",
+			"headerData": [],
+			"url": "{{baseUrl}}/api/wallet/list?page=2&size10",
+			"queryParams": [
+				{
+					"key": "page",
+					"value": "2",
+					"equals": true,
+					"description": "",
+					"enabled": true
+				},
+				{
+					"key": "size10",
+					"value": "",
+					"equals": false,
+					"description": "",
+					"enabled": true
+				}
+			],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "GET",
+			"data": null,
+			"dataMode": "params",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1605810070717,
+			"name": "get all wallets",
+			"description": "",
+			"collectionId": "a83eb377-b6cf-d5d0-c765-2c64578ace05",
+			"responses": []
+		},
+		{
+			"id": "cc3ed47b-8a70-30d2-7c1d-0c1d847d68e0",
+			"headers": "",
+			"headerData": [],
+			"url": "{{baseUrl}}/api/wallet/1",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "GET",
+			"data": null,
+			"dataMode": "params",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1605810068343,
+			"name": "get wallet info",
+			"description": "",
+			"collectionId": "a83eb377-b6cf-d5d0-c765-2c64578ace05",
+			"responses": []
+		},
+		{
+			"id": "e891959f-71c7-6406-1b89-ba06075c0d78",
+			"headers": "",
+			"headerData": [],
+			"url": "{{baseUrl}}/api/wallet/22",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "DELETE",
+			"data": null,
+			"dataMode": "params",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1605810072187,
+			"name": "delete wallet",
+			"description": "",
+			"collectionId": "a83eb377-b6cf-d5d0-c765-2c64578ace05",
+			"responses": []
+		}
+	]
+}
