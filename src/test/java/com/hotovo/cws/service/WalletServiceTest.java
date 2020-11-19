@@ -1,13 +1,13 @@
 package com.hotovo.cws.service;
 
-import static com.hotovo.cws.service.TestDataService.*;
+import static com.hotovo.cws.service.TestDataService.createWalletRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.hotovo.cws.controller.dto.WalletRequest;
 import com.hotovo.cws.domain.Currency;
 import com.hotovo.cws.domain.Wallet;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,30 +17,41 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class WalletServiceTest {
 
-	@BeforeEach
-	void setUp() {
-		sut.fetchWallets().clear();
-	}
-
 	@Autowired
 	private WalletService sut;
 
 	@Test
 	@DisplayName("when_wallet_create_then_wallet_created")
 	void create_wallet() {
-		Wallet wallet = sut.createWallet(createTestWallet());
+		WalletRequest walletRequest = createWalletRequest();
+		Wallet wallet = sut.createWallet(walletRequest);
 
-		assertWallet(wallet, NAME, PRIVATE_KEY, PUBLIC_KEY, Wallet.getWalletId().decrementAndGet());
+		assertWallet(wallet, walletRequest.getName(), walletRequest.getPrivateKey(), walletRequest.getPublicKey(), Wallet.getWalletId().decrementAndGet());
 	}
+
+	@Test
+	@DisplayName("given_existing_wallet_then_exception_thrown")
+	void create_wallet_duplicate() {
+		//create first
+		WalletRequest walletRequest = createWalletRequest();
+		sut.createWallet(walletRequest);
+
+		assertThatThrownBy(() ->
+				sut.createWallet(walletRequest))
+				.isInstanceOf(RuntimeException.class)
+				.hasMessageContaining("Wallet with requested name, private and public key already present! Won't be created");
+	}
+
 
 	@Test
 	@DisplayName("given_existing_wallet_when_get_then_wallet_returned")
 	void get_wallet_info_success() {
-		Wallet wallet = sut.createWallet(createTestWallet());
+		WalletRequest walletRequest = createWalletRequest();
+		Wallet wallet = sut.createWallet(walletRequest);
 
 		Optional<Wallet> walletInfo = sut.getWalletInformation(wallet.getId());
 		assertThat(walletInfo).isPresent();
-		assertWallet(walletInfo.get(), NAME, PRIVATE_KEY, PUBLIC_KEY, wallet.getId());
+		assertWallet(walletInfo.get(), walletRequest.getName(), walletRequest.getPrivateKey(), walletRequest.getPublicKey(), wallet.getId());
 	}
 
 	@Test
@@ -53,20 +64,19 @@ class WalletServiceTest {
 	@Test
 	@DisplayName("given_existing_wallet_when_wallet_update_then_wallet_updated")
 	void update_wallet_success() {
-		Wallet wallet = sut.createWallet(createTestWallet());
+		Wallet wallet = sut.createWallet(createWalletRequest());
 
-		Optional<Wallet> walletInfo =
-				sut.updateWallet(
-						Wallet.builder().id(wallet.getId()).name("test wallet updated").publicKey("public key changed").privateKey("private key changed").build());
-		assertThat(walletInfo).isPresent();
-		assertWallet(walletInfo.get(), "test wallet updated", "private key changed", "public key changed", wallet.getId());
+		Wallet walletInfo =
+				sut.updateWallet(wallet.getId(), TestDataService.updateWalletRequest("test wallet updated", "private key changed", "public key changed"));
+		assertThat(walletInfo).isNotNull();
+		assertWallet(walletInfo, "test wallet updated", "private key changed", "public key changed", wallet.getId());
 	}
 
 	@Test
 	@DisplayName("given_not_existing_wallet_when_wallet_update_then_exception")
 	void update_wallet_fail() {
 		assertThatThrownBy(() ->
-				sut.updateWallet(Wallet.builder().name("test wallet updated").publicKey("public key changed").privateKey("private key changed").build()))
+				sut.updateWallet(123L, TestDataService.updateWalletRequest("test wallet updated", "private key changed", "public key changed")))
 				.isInstanceOf(RuntimeException.class)
 				.hasMessageContaining("Wallet for update not found!");
 	}
@@ -74,11 +84,11 @@ class WalletServiceTest {
 	@Test
 	@DisplayName("given_existing_wallet_when_delete_then_wallet_deleted")
 	void delete_wallet_success() {
-		Wallet wallet = sut.createWallet(createTestWallet());
+		Wallet wallet = sut.createWallet(createWalletRequest());
 
-		Optional<Wallet> deletedWallet = sut.deleteWallet(wallet.getId());
-		assertThat(deletedWallet).isPresent();
-		assertWallet(deletedWallet.get(), NAME, PRIVATE_KEY, PUBLIC_KEY, wallet.getId());
+		Wallet deletedWallet = sut.deleteWallet(wallet.getId());
+		assertThat(deletedWallet).isNotNull();
+		assertWallet(deletedWallet, wallet.getName(), wallet.getPrivateKey(), wallet.getPublicKey(), wallet.getId());
 		assertThat(sut.fetchWallets()).isEmpty();
 	}
 

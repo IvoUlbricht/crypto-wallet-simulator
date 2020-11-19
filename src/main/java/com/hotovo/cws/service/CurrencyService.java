@@ -49,7 +49,7 @@ public class CurrencyService {
 
 		Currency destinationCurrency = findOrCreateNewCurrency(destWallet, destSymbol);
 
-		Double price = fetchPrice(sourceSymbol, destSymbol);
+		Double price = sourceSymbol.equalsIgnoreCase(destSymbol) ? 1.0 : fetchPrice(sourceSymbol, destSymbol);
 
 		try {
 			log.info("Money transfer from wallet {} to wallet {} started!", sourceWallet.getId(), destWallet.getId());
@@ -79,7 +79,8 @@ public class CurrencyService {
 	 * @return wallet with currency changes
 	 */
 	public Wallet buyCurrency(String sourceSymbol, Double amount, String destSymbol, Wallet wallet) {
-		Double price = fetchPrice(sourceSymbol, destSymbol);
+
+		Double price = sourceSymbol.equalsIgnoreCase(destSymbol) ? 1.0 : fetchPrice(sourceSymbol, destSymbol);
 
 		Currency destinationCurrency = findOrCreateNewCurrency(wallet, destSymbol);
 		destinationCurrency.setAmount(destinationCurrency.getAmount() + amount * price);

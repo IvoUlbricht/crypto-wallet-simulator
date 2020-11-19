@@ -1,6 +1,5 @@
 package com.hotovo.cws.domain;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -23,12 +22,8 @@ public class Wallet {
 	private String name;
 	private Set<Currency> currencies = new LinkedHashSet<>();
 
-	public void assignId() {
-		this.id = walletId.get();
-		walletId.incrementAndGet();
-	}
-
 	public static AtomicLong getWalletId() {
 		return walletId;
 	}
+
 }

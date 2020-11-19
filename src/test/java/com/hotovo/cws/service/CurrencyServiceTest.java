@@ -1,5 +1,9 @@
 package com.hotovo.cws.service;
 
+import static com.hotovo.cws.service.TestDataService.createWallet;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.hotovo.cws.domain.Currency;
 import com.hotovo.cws.domain.Wallet;
 import org.junit.jupiter.api.DisplayName;
@@ -8,10 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.web.client.RestTemplate;
-
-import static com.hotovo.cws.service.TestDataService.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
@@ -26,8 +26,8 @@ class CurrencyServiceTest {
 	@Test
 	@DisplayName("given existing wallets with enough balance of currency when transfer request then transfer successfull")
 	void currency_transfer_success() {
-		Wallet sourceWallet = createTestWallet();
-		Wallet destinationWallet = createTestWallet();
+		Wallet sourceWallet = createWallet();
+		Wallet destinationWallet = createWallet();
 
 		boolean txResult = sut.transferCurrency(sourceWallet, "BTC", 0.5, destinationWallet, "ETH");
 		assertThat(txResult).isTrue();
@@ -48,9 +48,9 @@ class CurrencyServiceTest {
 	@Test
 	@DisplayName("given existing wallets with low balance of currency when transfer request then throw runtime exception")
 	void currency_transfer_failed_low_balance() {
-		Wallet sourceWallet = createTestWallet();
+		Wallet sourceWallet = createWallet();
 		sourceWallet.getCurrencies().add(new Currency(25.0, "ETH"));
-		Wallet destinationWallet = createTestWallet();
+		Wallet destinationWallet = createWallet();
 
 		assertThatThrownBy(() -> sut.transferCurrency(sourceWallet, "ETH", 26.0, destinationWallet, "ETH"))
 				.isInstanceOf(RuntimeException.class)
@@ -70,7 +70,7 @@ class CurrencyServiceTest {
 	@Test
 	@DisplayName("given existing wallet when request buy currency then success")
 	void currency_buy_success() {
-		Wallet wallet = createTestWallet();
+		Wallet wallet = createWallet();
 
 		wallet = sut.buyCurrency("BTC", 0.38, "BTC", wallet);
 
@@ -83,7 +83,7 @@ class CurrencyServiceTest {
 	@Test
 	@DisplayName("given existing wallet when buy currency with wrong symbol then failed")
 	void currency_buy_failed() {
-		Wallet wallet = createTestWallet();
+		Wallet wallet = createWallet();
 
 		assertThatThrownBy(() -> sut.buyCurrency("ASDF", 0.38, "ASDF", wallet))
 				.isInstanceOf(RuntimeException.class)
