@@ -7,12 +7,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.hotovo.cws.controller.dto.WalletRequest;
 import com.hotovo.cws.domain.Currency;
 import com.hotovo.cws.domain.Wallet;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class WalletServiceTest {
@@ -49,16 +50,18 @@ class WalletServiceTest {
 		WalletRequest walletRequest = createWalletRequest();
 		Wallet wallet = sut.createWallet(walletRequest);
 
-		Optional<Wallet> walletInfo = sut.getWalletInformation(wallet.getId());
-		assertThat(walletInfo).isPresent();
-		assertWallet(walletInfo.get(), walletRequest.getName(), walletRequest.getPrivateKey(), walletRequest.getPublicKey(), wallet.getId());
+		Wallet walletInfo = sut.getWalletInformation(wallet.getId());
+		assertThat(walletInfo).isNotNull();
+		assertWallet(walletInfo, walletRequest.getName(), walletRequest.getPrivateKey(), walletRequest.getPublicKey(), wallet.getId());
 	}
 
 	@Test
 	@DisplayName("given_not_existing_wallet_when_get_then_wallet_return_failed")
 	void get_wallet_info_fail() {
-		Optional<Wallet> walletInfo = sut.getWalletInformation(123L);
-		assertThat(walletInfo).isNotPresent();
+		assertThatThrownBy(() ->
+				sut.getWalletInformation(123L))
+				.isInstanceOf(RuntimeException.class)
+				.hasMessageContaining("Wallet with requested id not found!");
 	}
 
 	@Test
@@ -85,11 +88,12 @@ class WalletServiceTest {
 	@DisplayName("given_existing_wallet_when_delete_then_wallet_deleted")
 	void delete_wallet_success() {
 		Wallet wallet = sut.createWallet(createWalletRequest());
+		Pageable pageable = PageRequest.of(0, 1);
 
 		Wallet deletedWallet = sut.deleteWallet(wallet.getId());
 		assertThat(deletedWallet).isNotNull();
 		assertWallet(deletedWallet, wallet.getName(), wallet.getPrivateKey(), wallet.getPublicKey(), wallet.getId());
-		assertThat(sut.fetchWallets()).isEmpty();
+		assertThat(sut.fetchWallets(pageable)).isEmpty();
 	}
 
 	@Test

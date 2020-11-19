@@ -41,10 +41,10 @@ public class CurrencyService {
 	 * @return <tt>true</tt> or <tt>false</tt> based on the transaction success
 	 * @throws RuntimeException if the specified currency and its balance is lower then requested amount
 	 */
-	public boolean transferCurrency(Wallet sourceWallet, String sourceSymbol, Double transferAmount, Wallet destWallet, String destSymbol) {
+	public void transferCurrency(Wallet sourceWallet, String sourceSymbol, Double transferAmount, Wallet destWallet, String destSymbol) {
 		Currency sourceCurrency = sourceWallet.getCurrencies().stream()
 				.filter(currency -> currency.getSymbol().equalsIgnoreCase(sourceSymbol) && currency.getAmount() >= transferAmount)
-				.findAny()
+				.findFirst()
 				.orElseThrow(() -> new RuntimeException("Source wallet has no such currency or balance is lower then requested amount!"));
 
 		Currency destinationCurrency = findOrCreateNewCurrency(destWallet, destSymbol);
@@ -59,12 +59,11 @@ public class CurrencyService {
 			destinationCurrency.setAmount(destinationCurrency.getAmount() + transferAmount * price);
 			addOrReplaceCurrency(destWallet, destinationCurrency);
 			log.info("Money transfer from wallet {} to wallet {} successfull!", sourceWallet.getId(), destWallet.getId());
-			return true;
 		} catch (Exception e) {
 			log.error("Error performing transaction.... switching back to original state");
 			addOrReplaceCurrency(sourceWallet, sourceCurrency);
 			addOrReplaceCurrency(destWallet, destinationCurrency);
-			return false;
+			throw e;
 		}
 	}
 
@@ -119,13 +118,13 @@ public class CurrencyService {
 	private Currency findOrCreateNewCurrency(Wallet destWallet, String destSymbol) {
 		return destWallet.getCurrencies().stream()
 				.filter(currency -> currency.getSymbol().equalsIgnoreCase(destSymbol))
-				.findAny()
+				.findFirst()
 				.orElse(new Currency(0.0, destSymbol));
 	}
 
-	private void addOrReplaceCurrency(Wallet sourceWallet, Currency sourceCurrency) {
-		sourceWallet.getCurrencies().remove(sourceCurrency);
-		sourceWallet.getCurrencies().add(sourceCurrency);
+	private void addOrReplaceCurrency(Wallet wallet, Currency sourceCurrency) {
+		wallet.getCurrencies().remove(sourceCurrency);
+		wallet.getCurrencies().add(sourceCurrency);
 	}
 
 	private HttpEntity createEntityWithAuthHeader() {

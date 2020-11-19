@@ -1,22 +1,22 @@
 package com.hotovo.cws.service;
 
 import com.hotovo.cws.controller.dto.WalletRequest;
+import com.hotovo.cws.domain.Currency;
 import com.hotovo.cws.domain.Wallet;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-@CacheConfig(cacheNames = {"wallets"})
 public class WalletService {
 
 	/**
@@ -30,33 +30,32 @@ public class WalletService {
 	 * @param id - identificator of the wallet to be returned
 	 * @return wallet information
 	 */
-	@Cacheable
-	public Optional<Wallet> getWalletInformation(Long id) {
+	public Wallet getWalletInformation(Long id) {
 		return wallets.stream()
 				.filter(wallet -> wallet.getId().equals(id))
-				.findAny();
+				.findFirst()
+				.orElseThrow(() -> new RuntimeException("Wallet with requested id not found!"));
 	}
 
 	/**
 	 * Adds the wallet to the wallets collection
 	 *
-	 * @param wallet - parameters for the wallet to be created
+	 * @param createWallet - parameters for the wallet to be created
 	 * @return created wallet
 	 */
-	@Cacheable
-	public Wallet createWallet(WalletRequest wallet) {
-		Optional<Wallet> existingWallet = wallets.stream().filter(w -> isDuplicate(w, wallet)).findAny();
+	public Wallet createWallet(WalletRequest createWallet) {
+		Optional<Wallet> existingWallet = wallets.stream().filter(w -> isDuplicate(w, createWallet)).findFirst();
 
 		if (!existingWallet.isPresent()) {
 			Wallet createdWallet = Wallet.builder()
 					.id(Wallet.getWalletId().getAndIncrement())
-					.privateKey(wallet.getPrivateKey())
-					.publicKey(wallet.getPublicKey())
-					.currencies(wallet.getCurrencies())
-					.name(wallet.getName())
+					.privateKey(createWallet.getPrivateKey())
+					.publicKey(createWallet.getPublicKey())
+					.currencies(createWallet.getCurrencies())
+					.name(createWallet.getName())
 					.build();
 			wallets.add(createdWallet);
-			log.info("Wallet {} was created successfully!", wallet.getName());
+			log.info("Wallet {} was created successfully!", createWallet.getName());
 			return createdWallet;
 		} else {
 			throw new RuntimeException("Wallet with requested name, private and public key already present! Won't be created");
@@ -71,11 +70,10 @@ public class WalletService {
 	 * @return updated wallet
 	 * @throws RuntimeException in case the wallet is found in the wallets collection
 	 */
-	@CachePut(key = "#wallet.id")
 	public Wallet updateWallet(Long id, WalletRequest walletUpdate) {
 		return wallets.stream()
 				.filter(w -> w.getId().equals(id))
-				.findAny()
+				.findFirst()
 				.map(wallet -> {
 					wallet.setName(walletUpdate.getName());
 					wallet.setPrivateKey(walletUpdate.getPrivateKey());
@@ -93,11 +91,10 @@ public class WalletService {
 	 * @return removed wallet
 	 * @throws RuntimeException in case the wallet is found in the wallets collection
 	 */
-	@CacheEvict(key = "#wallet.id")
 	public Wallet deleteWallet(Long id) {
 		return wallets.stream()
 				.filter(w -> w.getId().equals(id))
-				.findAny()
+				.findFirst()
 				.map(w -> {
 					wallets.remove(w);
 					log.info("Wallet with id {} was deleted successfully!", id);
@@ -111,8 +108,10 @@ public class WalletService {
 	 *
 	 * @return wallets collection
 	 */
-	public List<Wallet> fetchWallets() {
-		return new ArrayList<>(wallets);
+	public Page<Wallet> fetchWallets(Pageable pageable) {
+		int start = (int) pageable.getOffset();
+		int end = Math.min((start + pageable.getPageSize()), wallets.size());
+		return new PageImpl<>(new ArrayList<>(wallets).subList(start, end), pageable, wallets.size());
 	}
 
 	private boolean isDuplicate(Wallet wallet, WalletRequest walletRequest) {
@@ -120,23 +119,23 @@ public class WalletService {
 				.equals(walletRequest.getPublicKey());
 	}
 
-	//	test data initialization
+	//test data initialization
 //	@PostConstruct
-//	private void initWallets() {
-//		Set<Currency> currencies = new LinkedHashSet<>();
-//		currencies.add(new Currency(1.0, "BTC"));
-//		currencies.add(new Currency(5.0, "ETH"));
-//		currencies.add(new Currency(10.0, "LTC"));
-//
-//		while (wallets.size() < 20) {
-//			long id = Wallet.getWalletId().getAndIncrement();
-//			wallets.add(Wallet.builder()
-//					.id(id)
-//					.name("wallet " + id)
-//					.privateKey(UUID.randomUUID().toString())
-//					.publicKey(UUID.randomUUID().toString())
-//					.currencies(currencies)
-//					.build());
-//		}
-//	}
+	private void initWallets() {
+		Set<Currency> currencies = new LinkedHashSet<>();
+		currencies.add(new Currency(100.0, "BTC"));
+		currencies.add(new Currency(5000.0, "ETH"));
+		currencies.add(new Currency(28.0, "LTC"));
+
+		while (wallets.size() < 20) {
+			long id = Wallet.getWalletId().getAndIncrement();
+			wallets.add(Wallet.builder()
+					.id(id)
+					.name("wallet " + id)
+					.privateKey(UUID.randomUUID().toString())
+					.publicKey(UUID.randomUUID().toString())
+					.currencies(currencies)
+					.build());
+		}
+	}
 }

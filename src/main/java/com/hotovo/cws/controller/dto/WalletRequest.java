@@ -2,7 +2,7 @@ package com.hotovo.cws.controller.dto;
 
 import com.hotovo.cws.domain.Currency;
 import java.util.Set;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,11 +16,11 @@ import lombok.Setter;
 @AllArgsConstructor
 public class WalletRequest {
 
-	@NotNull
+	@NotBlank(message = "wallet private key can not be blank")
 	private String privateKey;
-	@NotNull
+	@NotBlank(message = "wallet public key can not be blank")
 	private String publicKey;
-	@NotNull
+	@NotBlank(message = "wallet name can not be blank")
 	private String name;
 	private Set<Currency> currencies;
 }

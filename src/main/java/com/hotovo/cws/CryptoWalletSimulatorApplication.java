@@ -6,7 +6,6 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
-@EnableCaching
 @SpringBootApplication
 public class CryptoWalletSimulatorApplication {
 

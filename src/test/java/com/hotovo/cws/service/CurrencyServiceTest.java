@@ -29,17 +29,16 @@ class CurrencyServiceTest {
 		Wallet sourceWallet = createWallet();
 		Wallet destinationWallet = createWallet();
 
-		boolean txResult = sut.transferCurrency(sourceWallet, "BTC", 0.5, destinationWallet, "ETH");
-		assertThat(txResult).isTrue();
+		sut.transferCurrency(sourceWallet, "BTC", 0.5, destinationWallet, "ETH");
 
 		Currency sourceCurrency = sourceWallet.getCurrencies().stream()
-				.filter(curr -> curr.getSymbol().equalsIgnoreCase("BTC")).findAny().orElse(null);
+				.filter(curr -> curr.getSymbol().equalsIgnoreCase("BTC")).findFirst().orElse(null);
 		assertThat(sourceCurrency).isNotNull();
 		assertThat(sourceCurrency.getSymbol()).isEqualTo("BTC");
 		assertThat(sourceCurrency.getAmount()).isEqualTo(0.5);
 
 		Currency destCurrency = destinationWallet.getCurrencies().stream()
-				.filter(curr -> curr.getSymbol().equalsIgnoreCase("ETH")).findAny().orElse(null);
+				.filter(curr -> curr.getSymbol().equalsIgnoreCase("ETH")).findFirst().orElse(null);
 		assertThat(destCurrency).isNotNull();
 		assertThat(destCurrency.getSymbol()).isEqualTo("ETH");
 		assertThat(destCurrency.getAmount()).isGreaterThan(0.0);
@@ -57,13 +56,13 @@ class CurrencyServiceTest {
 				.hasMessageContaining("Source wallet has no such currency or balance is lower then requested amount!");
 
 		Currency sourceCurrency = sourceWallet.getCurrencies().stream()
-				.filter(curr -> curr.getSymbol().equalsIgnoreCase("ETH")).findAny().orElse(null);
+				.filter(curr -> curr.getSymbol().equalsIgnoreCase("ETH")).findFirst().orElse(null);
 		assertThat(sourceCurrency).isNotNull();
 		assertThat(sourceCurrency.getSymbol()).isEqualTo("ETH");
 		assertThat(sourceCurrency.getAmount()).isEqualTo(25.0);
 
 		Currency destCurrency = destinationWallet.getCurrencies().stream()
-				.filter(curr -> curr.getSymbol().equalsIgnoreCase("ETH")).findAny().orElse(null);
+				.filter(curr -> curr.getSymbol().equalsIgnoreCase("ETH")).findFirst().orElse(null);
 		assertThat(destCurrency).isNull();
 	}
 
@@ -74,7 +73,7 @@ class CurrencyServiceTest {
 
 		wallet = sut.buyCurrency("BTC", 0.38, "BTC", wallet);
 
-		Currency currency = wallet.getCurrencies().stream().filter(curr -> curr.getSymbol().equalsIgnoreCase("BTC")).findAny().orElse(null);
+		Currency currency = wallet.getCurrencies().stream().filter(curr -> curr.getSymbol().equalsIgnoreCase("BTC")).findFirst().orElse(null);
 		assertThat(currency).isNotNull();
 		assertThat(currency.getSymbol()).isEqualTo("BTC");
 		assertThat(currency.getAmount()).isEqualTo(1.38);
@@ -85,11 +84,11 @@ class CurrencyServiceTest {
 	void currency_buy_failed() {
 		Wallet wallet = createWallet();
 
-		assertThatThrownBy(() -> sut.buyCurrency("ASDF", 0.38, "ASDF", wallet))
+		assertThatThrownBy(() -> sut.buyCurrency("ASDF", 0.38, "BTC", wallet))
 				.isInstanceOf(RuntimeException.class)
 				.hasMessageContaining("Price for currency not found or not valid!");
 
-		Currency currency = wallet.getCurrencies().stream().filter(curr -> curr.getSymbol().equalsIgnoreCase("currency")).findAny().orElse(null);
+		Currency currency = wallet.getCurrencies().stream().filter(curr -> curr.getSymbol().equalsIgnoreCase("currency")).findFirst().orElse(null);
 		assertThat(currency).isNull();
 	}
 }
