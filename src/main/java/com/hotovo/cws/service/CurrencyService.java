@@ -8,6 +8,8 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -113,6 +115,30 @@ public class CurrencyService {
 				.map(o -> (Number) o)
 				.map(Number::doubleValue)
 				.orElseThrow(() -> new RuntimeException("Price for currency not found or not valid!"));
+	}
+
+	@Cacheable(value = "currencies")
+	public Boolean isCurrencyValid(String currencySymbol) {
+		UriComponents uri = UriComponentsBuilder
+				.fromHttpUrl(ccBaseUrl.concat("/data/all/coinlist"))
+				.build();
+
+		log.info("External endpoint call with method {} to {} ", HttpMethod.GET, uri.toString());
+		ResponseEntity<HashMap> responseEntity = restTemplate.exchange(uri.toUri(), HttpMethod.GET, createEntityWithAuthHeader(), HashMap.class);
+
+		return Optional.ofNullable(responseEntity.getBody())
+				.map(response -> {
+					log.info("Received available currencies from crypto compare");
+					return response.get("Data");
+				})
+				.filter(o -> o instanceof HashMap)
+				.map(o-> (HashMap) o)
+				.map(HashMap::keySet)
+				.map(keyset -> keyset.stream().anyMatch(symbol -> symbol.toString().equalsIgnoreCase(currencySymbol)))
+				.orElseGet(() -> {
+					log.info("Currency {} is not valid and won't be saved", currencySymbol);
+					return false;
+				});
 	}
 
 	private Currency findOrCreateNewCurrency(Wallet destWallet, String destSymbol) {

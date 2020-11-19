@@ -6,3 +6,4 @@
 - use cryptocompare.com currency data for conversion to buy(transfer) money to wallet and wallet to wallet transfer 
 - API documentation found under https://shielded-retreat-08387.herokuapp.com/swagger-ui.html#/
  
+- enable or disable @PostConstruct for test data creation

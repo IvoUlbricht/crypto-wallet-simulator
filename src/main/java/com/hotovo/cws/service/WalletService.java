@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class WalletService {
 
+
 	/**
 	 * Collection of existing wallets
 	 */

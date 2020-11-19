@@ -3,12 +3,15 @@ package com.hotovo.cws.controller;
 import com.hotovo.cws.controller.dto.CurrencyBuyRequest;
 import com.hotovo.cws.controller.dto.CurrencyTransferRequest;
 import com.hotovo.cws.controller.dto.WalletRequest;
+import com.hotovo.cws.domain.Currency;
 import com.hotovo.cws.domain.Wallet;
 import com.hotovo.cws.service.CurrencyService;
 import com.hotovo.cws.service.WalletService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
@@ -68,6 +71,11 @@ public class WalletController {
 	public ResponseEntity createWallet(@RequestBody @Valid WalletRequest wallet) {
 		log.debug("Request for CREATE wallet {}", wallet);
 		try {
+			Set<Currency> validCurrencies = wallet.getCurrencies().stream()
+					.filter(currency -> currencyService.isCurrencyValid(currency.getSymbol()))
+					.collect(Collectors.toSet());
+			wallet.setCurrencies(validCurrencies);
+			log.info("wallet request currencies{}", validCurrencies.toString());
 			return ResponseEntity.ok(walletService.createWallet(wallet));
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
